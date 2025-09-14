@@ -1,0 +1,8 @@
+{
+  "name": "gee-map-app",
+  "version": "1.0.0",
+  "description": "Serverless functions for GEE integration.",
+  "dependencies": {
+    "@google/earthengine": "^0.1.394"
+  }
+}
