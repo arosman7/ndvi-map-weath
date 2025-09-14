@@ -130,7 +130,8 @@
         async function fetchNdviData(lat, lng) {
             ui.ndviValue.textContent = translations[currentLang].fetching_ndvi;
             try {
-                const response = await fetch(`/api/get-ndvi-value?lat=${lat}&lng=${lng}`);
+                // FIX: Changed parameter name from 'lng' to 'lon' to match the backend API.
+                const response = await fetch(`/api/get-ndvi-value?lat=${lat}&lon=${lng}`);
                 if (!response.ok) throw new Error('Failed to fetch NDVI value from server');
                 const data = await response.json();
                 if (data.ndvi !== null && typeof data.ndvi !== 'undefined') {
@@ -160,3 +161,4 @@
 
 </body>
 </html>
+
