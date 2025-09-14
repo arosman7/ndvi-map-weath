@@ -1,83 +1,76 @@
 const ee = require('@google/earthengine');
 
-// The main handler for the serverless function
+// Main handler for the serverless function
 module.exports = async (req, res) => {
     try {
-        // Authenticate with Google Earth Engine using credentials from environment variables
-        await initializeEe();
+        await authenticateAndInitialize();
 
-        // Define the GEE logic to create an NDVI image
+        // Get an NDVI image, now optimized to search a smaller region
         const image = getNdviImage();
 
-        // Define visualization parameters for the map tiles
         const visParams = {
-            min: -0.2, // Min NDVI value
-            max: 0.8,  // Max NDVI value
-            palette: ['#E3A857', '#FCDD94', '#B6D97C', '#84C065', '#45A24B', '#117A37'] // Brown to green palette
+            min: -0.2, max: 0.8,
+            palette: ['#E3A857', '#FCDD94', '#B6D97C', '#84C065', '#45A24B', '#117A37']
         };
 
-        // Get the map ID from Earth Engine
         const mapId = await getMapId(image, visParams);
+        
+        // The URL format from getMapId contains {x}, {y}, {z} placeholders.
+        // We need to replace them with the actual values from the request query.
+        const { x, y, z } = req.query;
+        const tileUrl = mapId.urlFormat.replace('{x}', x).replace('{y}', y).replace('{z}', z);
 
-        // Redirect the client's request to the actual Google tile server URL
-        res.redirect(mapId.urlFormat);
+        // Redirect the client to the actual Google tile server URL
+        res.redirect(302, tileUrl);
 
     } catch (error) {
-        console.error('GEE Tile Error:', error);
+        console.error('GEE Tile Error:', error.message);
         res.status(500).json({ error: 'Failed to generate GEE map tiles.', details: error.message });
     }
 };
 
-// --- GEE Helper Functions ---
+// --- GEE Helper Functions (Optimized) ---
 
-const initializeEe = () => {
-    return new Promise((resolve, reject) => {
-        // Vercel environment variables are in process.env
-        const privateKey = JSON.parse(process.env.GEE_PRIVATE_KEY_JSON);
-        const projectId = process.env.GEE_PROJECT_ID;
+const authenticateAndInitialize = () => new Promise((resolve, reject) => {
+    const privateKey = JSON.parse(process.env.GEE_PRIVATE_KEY_JSON);
+    const projectId = process.env.GEE_PROJECT_ID;
 
-        ee.data.authenticateViaPrivateKey(privateKey, 
-            () => ee.initialize(null, null, resolve, reject, null, projectId),
-            reject
-        );
-    });
-};
+    ee.data.authenticateViaPrivateKey(privateKey, 
+        () => ee.initialize(null, null, resolve, reject, null, projectId),
+        (err) => reject(new Error(`GEE Authentication failed: ${err}`))
+    );
+});
 
 const getNdviImage = () => {
-    // Use Sentinel-2 Level-2A surface reflectance data
+    // **OPTIMIZATION**: Define a large bounding box roughly covering Central Asia/Kazakhstan
+    // instead of searching the entire planet. Coordinates are [minLon, minLat, maxLon, maxLat].
+    const regionOfInterest = ee.Geometry.Rectangle([45, 40, 90, 56]);
+
     const s2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED');
 
-    // Function to mask clouds using the QA band
     const maskS2clouds = (image) => {
         const qa = image.select('QA60');
         const cloudBitMask = 1 << 10;
         const cirrusBitMask = 1 << 11;
         const mask = qa.bitwiseAnd(cloudBitMask).eq(0).and(qa.bitwiseAnd(cirrusBitMask).eq(0));
-        return image.updateMask(mask).divide(10000); // Scale reflectance values
+        return image.updateMask(mask).divide(10000);
     };
 
-    // Get the most recent cloud-free image
     const recentImage = s2
-        .filterDate(ee.Date(Date.now()).advance(-3, 'month'), ee.Date(Date.now()))
+        .filterBounds(regionOfInterest) // Apply the regional filter
+        .filterDate(ee.Date(Date.now()).advance(-120, 'day'), ee.Date(Date.now()))
         .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 20))
         .map(maskS2clouds)
-        .sort('system:time_start', false) // Sort descending to get the latest
+        .sort('system:time_start', false)
         .first();
 
-    // Calculate NDVI: (NIR - Red) / (NIR + Red)
-    // For Sentinel-2, NIR is band B8, Red is band B4
-    const ndvi = recentImage.normalizedDifference(['B8', 'B4']).rename('NDVI');
-    
-    return ndvi;
+    return recentImage.normalizedDifference(['B8', 'B4']).rename('NDVI');
 };
 
-const getMapId = (image, visParams) => {
-    return new Promise((resolve, reject) => {
-        image.getMap(visParams, (mapId, error) => {
-            if (error) {
-                return reject(new Error(error));
-            }
-            resolve(mapId);
-        });
+const getMapId = (image, visParams) => new Promise((resolve, reject) => {
+    image.getMap(visParams, (mapId, error) => {
+        if (error) return reject(new Error(error));
+        resolve(mapId);
     });
-};
+});
+
