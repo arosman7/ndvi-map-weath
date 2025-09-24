@@ -115,10 +115,9 @@ function interpretNdvi(ndvi) {
 async function getOpenAiRecommendation(prompt, apiKey) {
     return new Promise((resolve, reject) => {
         const payload = JSON.stringify({
-            model: "gpt-5",
+            model: "gpt-4.1",
             messages: [{ role: "user", content: prompt }],
-            reasoning={effort: "minimal"},
-            
+                        
             
         });
 
