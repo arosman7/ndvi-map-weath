@@ -40,9 +40,7 @@
         
         /* Styles for Markdown content */
         #recommendation-container { 
-            white-space: pre-wrap; 
             line-height: 1.6; 
-            word-wrap: break-word;
             text-align: left; /* Align text to the left for better readability */
         }
         #recommendation-container h1,
@@ -140,7 +138,7 @@
             <!-- Forecast Section -->
             <div class="mb-4">
                 <h2 data-translate-key="forecast_title" class="text-lg font-semibold text-cyan-300 mb-2"></h2>
-                <div id="forecast-container" class="bg-gray-900 rounded-md p-3 space-y-2 min-h-[150px] flex flex-col justify-center">
+                <div id="forecast-container" class="bg-gray-900 rounded-md p-3 min-h-[150px] flex flex-col justify-center">
                      <p data-translate-key="forecast_placeholder" class="text-center text-gray-400"></p>
                 </div>
             </div>
@@ -154,7 +152,7 @@
             <h2 data-translate-key="recommendation_title" class="text-xl font-bold text-cyan-300"></h2>
             <button id="close-recs-btn" class="text-gray-400 hover:text-white text-3xl font-bold leading-none">&times;</button>
         </div>
-        <div id="recommendation-container" class="p-3 bg-gray-800 rounded-md min-h-[150px] flex items-center justify-center">
+        <div id="recommendation-container" class="p-3 bg-gray-800 rounded-md min-h-[150px]">
             <p data-translate-key="recs_placeholder" class="text-center text-gray-400"></p>
         </div>
     </div>
@@ -198,7 +196,58 @@
 
         function getWeatherInfo(code) { const icons = { 0:"☀️", 1:"🌤️", 2:"⛅", 3:"☁️", 45:"🌫️", 48:"🌫️", 51:"💧", 53:"💧", 55:"💧", 61:"🌧️", 63:"🌧️", 65:"🌧️", 80:"🌦️", 81:"🌦️", 82:"🌦️", 95:"⛈️" }; return { description: translations[currentLang].weather_codes[code] || "Unknown", icon: icons[code] || "🤷" }; }
         function displayCurrentWeather(current, units) { if (!current) return; const { description, icon } = getWeatherInfo(current.weather_code); const t = translations[currentLang]; ui.weather.innerHTML = `<div class="grid grid-cols-2 gap-4 w-full"><div class="flex flex-col items-center justify-center text-center col-span-2"><span class="text-4xl">${icon}</span><span class="font-semibold">${description}</span></div><div class="text-center"><span class="text-gray-400 text-sm block">${t.temp}</span><span class="font-bold text-xl">${current.temperature_2m}${units.temperature_2m}</span></div><div class="text-center"><span class="text-gray-400 text-sm block">${t.humidity}</span><span class="font-bold text-xl">${current.relative_humidity_2m}${units.relative_humidity_2m}</span></div><div class="text-center"><span class="text-gray-400 text-sm block">${t.precip}</span><span class="font-bold text-xl">${current.precipitation}${units.precipitation}</span></div><div class="text-center"><span class="text-gray-400 text-sm block">${t.wind}</span><span class="font-bold text-xl">${current.wind_speed_10m} ${units.wind_speed_10m}</span></div></div>`; }
-        function displayForecast(daily) { ui.forecast.innerHTML = ''; if (!daily || !daily.time || daily.time.length === 0) { ui.forecast.innerHTML = `<p class="text-center text-gray-400">${translations[currentLang].forecast_placeholder}</p>`; return; } daily.time.forEach((dateStr, i) => { const date = new Date(dateStr); const locale = currentLang === 'kk' ? 'kk-KZ' : 'ru-RU'; const day = date.toLocaleDateString(locale, { weekday: 'short' }); const { icon } = getWeatherInfo(daily.weather_code[i]); const maxTemp = Math.round(daily.temperature_2m_max[i]); const minTemp = Math.round(daily.temperature_2m_min[i]); const item = document.createElement('div'); item.className = 'flex items-center justify-between p-2 rounded-md hover:bg-gray-800'; item.innerHTML = `<div class="flex items-center gap-3"><span class="text-xl w-8 text-center">${icon}</span><div><p class="font-semibold">${day}</p><p class="text-xs text-gray-400">${`${date.getDate()}/${date.getMonth() + 1}`}</p></div></div><div><span class="font-medium">${maxTemp}°</span><span class="text-gray-400"> / ${minTemp}°</span></div>`; ui.forecast.appendChild(item); }); }
+        
+        function displayForecast(daily) { 
+            ui.forecast.innerHTML = ''; 
+            if (!daily || !daily.time || daily.time.length === 0) { 
+                ui.forecast.innerHTML = `<p class="text-center text-gray-400">${translations[currentLang].forecast_placeholder}</p>`; 
+                return; 
+            } 
+            daily.time.forEach((dateStr, i) => { 
+                const date = new Date(dateStr); 
+                const locale = currentLang === 'kk' ? 'kk-KZ' : 'ru-RU'; 
+                const day = date.toLocaleDateString(locale, { weekday: 'short' }); 
+                const { icon, description } = getWeatherInfo(daily.weather_code[i]); 
+                const maxTemp = Math.round(daily.temperature_2m_max[i]); 
+                const minTemp = Math.round(daily.temperature_2m_min[i]);
+                const precip = daily.precipitation_sum[i].toFixed(1);
+                const wind = Math.round(daily.wind_speed_10m_max[i]);
+                const humidity = Math.round(daily.relative_humidity_2m_mean[i]);
+
+                const item = document.createElement('div'); 
+                item.className = 'bg-gray-800 rounded-lg p-2 space-y-2 mb-2 transition-all hover:bg-gray-700'; 
+                item.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl w-10 text-center">${icon}</span>
+                            <div>
+                                <p class="font-semibold text-base">${day}, ${date.getDate()}/${date.getMonth() + 1}</p>
+                                <p class="text-sm text-gray-400">${description}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-lg">${maxTemp}°</p>
+                            <p class="text-gray-400">${minTemp}°</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 text-center text-sm pt-2 border-t border-gray-700">
+                        <div>
+                            <p class="text-xs text-gray-400" data-translate-key="precip">${translations[currentLang].precip}</p>
+                            <p class="font-semibold">${precip} mm</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400" data-translate-key="wind">${translations[currentLang].wind}</p>
+                            <p class="font-semibold">${wind} km/h</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400" data-translate-key="humidity">${translations[currentLang].humidity}</p>
+                            <p class="font-semibold">${humidity}%</p>
+                        </div>
+                    </div>
+                `; 
+                ui.forecast.appendChild(item); 
+            }); 
+        }
         
         // --- MAP LOGIC ---
         const markerSource = new ol.source.Vector();
@@ -207,7 +256,22 @@
         const map = new ol.Map({ target: 'map', layers: [ new ol.layer.Tile({ source: new ol.source.XYZ({ url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}' }) }), ndviLayer, markerLayer ], view: new ol.View({ center: ol.proj.fromLonLat([69.14, 54.87]), zoom: 7 }), controls: [], });
 
         // --- DATA FETCHING ---
-        async function fetchWeatherData(lat, lon) { ui.weather.innerHTML = `<p class="text-center text-yellow-400">${translations[currentLang].fetching_current}</p>`; ui.forecast.innerHTML = `<p class="text-center text-yellow-400">${translations[currentLang].fetching_forecast}</p>`; const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min&forecast_days=16`; try { const response = await fetch(apiUrl); if (!response.ok) throw new Error('Network response failed'); lastWeatherData = await response.json(); displayCurrentWeather(lastWeatherData.current, lastWeatherData.current_units); displayForecast(lastWeatherData.daily); } catch (error) { lastWeatherData = null; ui.weather.innerHTML = `<p class="text-center text-red-400">${translations[currentLang].error_current}</p>`; ui.forecast.innerHTML = `<p class="text-center text-red-400">${translations[currentLang].error_forecast}</p>`; } }
+        async function fetchWeatherData(lat, lon) { 
+            ui.weather.innerHTML = `<p class="text-center text-yellow-400">${translations[currentLang].fetching_current}</p>`; 
+            ui.forecast.innerHTML = `<p class="text-center text-yellow-400">${translations[currentLang].fetching_forecast}</p>`; 
+            const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,relative_humidity_2m_mean&forecast_days=16`; 
+            try { 
+                const response = await fetch(apiUrl); 
+                if (!response.ok) throw new Error('Network response failed'); 
+                lastWeatherData = await response.json(); 
+                displayCurrentWeather(lastWeatherData.current, lastWeatherData.current_units); 
+                displayForecast(lastWeatherData.daily); 
+            } catch (error) { 
+                lastWeatherData = null; 
+                ui.weather.innerHTML = `<p class="text-center text-red-400">${translations[currentLang].error_current}</p>`; 
+                ui.forecast.innerHTML = `<p class="text-center text-red-400">${translations[currentLang].error_forecast}</p>`; 
+            } 
+        }
         async function fetchNdviData(lat, lon) { ui.ndviValue.textContent = translations[currentLang].fetching_ndvi; lastNdviValue = null; try { const response = await fetch(`/api/get-ndvi-value?lat=${lat}&lon=${lon}`); if (!response.ok) throw new Error('Failed to fetch NDVI value'); const data = await response.json(); if (data.ndvi !== null && typeof data.ndvi !== 'undefined') { const ndvi = data.ndvi.toFixed(3); ui.ndviValue.textContent = ndvi; lastNdviValue = ndvi; } else { ui.ndviValue.textContent = translations[currentLang].ndvi_no_data; } } catch (error) { console.error("NDVI Value Fetch Error:", error); ui.ndviValue.textContent = translations[currentLang].ndvi_no_data; } }
         async function fetchRecommendations() {
             if (!lastClickedLatLng || !lastWeatherData || !lastNdviValue) {
