@@ -61,22 +61,20 @@ module.exports = async (req, res) => {
 function createPromptForAgronomist(lat, lon, ndvi, weather, lang) {
     const language = lang === 'kk' ? 'Kazakh' : 'Russian';
 
-    const promptContext = `You are an expert agronomist AI assistant specializing in wheat cultivation in Kazakhstan. Your task is to provide practical, actionable recommendations for a specific field. The recommendations must be in the ${language} language, be concise, and easy to understand for a farmer.`;
-
-    const weatherSummary = `
-- Current Temperature: ${weather.current.temperature_2m}°C
-- Current Relative Humidity: ${weather.current.relative_humidity_2m}%
-- Current Wind Speed: ${weather.current.wind_speed_10m} km/h
-- 16-Day Forecast Summary:
-  - Temperatures will range from ${Math.min(...weather.daily.temperature_2m_min)}°C to ${Math.max(...weather.daily.temperature_2m_max)}°C.
-  - The forecast indicates periods of ${getWeatherDescription(weather.daily.weather_code)}.
-`;
+    const promptContext = `You are an expert agronomist AI assistant specializing in wheat cultivation in Kazakhstan. Your task is to provide practical, actionable recommendations for a specific field. The recommendations must be in the ${language} language, well-structured with Markdown formatting (using headers like **Header**), and easy to understand for a farmer.`;
+    
+    // Create a detailed string from the daily forecast data
+    let dailyForecastString = "16-Day Forecast Details:\n";
+    weather.daily.time.forEach((date, i) => {
+        dailyForecastString += `- ${date}: Max Temp: ${weather.daily.temperature_2m_max[i]}°C, Min Temp: ${weather.daily.temperature_2m_min[i]}°C, Precipitation: ${weather.daily.precipitation_sum[i]}mm, Max Wind: ${weather.daily.wind_speed_10m_max[i]}km/h, Avg Humidity: ${weather.daily.relative_humidity_2m_mean[i]}%\n`;
+    });
 
     const dataAnalysis = `
 - Location (Latitude, Longitude): ${lat.toFixed(4)}, ${lon.toFixed(4)}
 - Current NDVI (Vegetation Index): ${ndvi}
 - NDVI Interpretation: An NDVI of ${ndvi} suggests ${interpretNdvi(ndvi)}.
-${weatherSummary}
+- Current Weather: Temp: ${weather.current.temperature_2m}°C, Humidity: ${weather.current.relative_humidity_2m}%, Wind: ${weather.current.wind_speed_10m} km/h
+- ${dailyForecastString}
 `;
     
     return `${promptContext}
@@ -85,13 +83,14 @@ DATA:
 ${dataAnalysis}
 
 TASK:
-Based on this data, provide recommendations for a wheat grower for the next 1-2 weeks. Focus on:
-1.  **Irrigation:** Is it needed? When and how much?
-2.  **Fertilization:** Are there signs of nutrient stress? What might be needed?
-3.  **Pest/Disease Control:** Does the weather forecast indicate high risks? What to scout for?
-4.  **General Management:** Any other critical advice.
+Based on this comprehensive data, provide recommendations for a wheat grower for the next 2 weeks. Focus on:
+1.  **Current Status & Immediate Actions:** Analyze the NDVI and current weather.
+2.  **Irrigation Plan:** Based on the full forecast, is irrigation needed? When and how much?
+3.  **Fertilization Strategy:** Does the NDVI suggest nutrient needs? What fertilizers might be required?
+4.  **Pest & Disease Outlook:** Does the weather forecast (humidity, rain) indicate high risks? What should the farmer scout for?
+5.  **General Management:** Any other critical advice based on the 16-day outlook.
 
-Format the response clearly with headings.`;
+Format the response clearly with Markdown headings.`;
 }
 
 /**
@@ -106,25 +105,6 @@ function interpretNdvi(ndvi) {
     return "very high plant health and dense canopy.";
 }
 
-/**
- * Gets a general weather description from a list of weather codes.
- * @param {number[]} codes - An array of weather codes from the forecast.
- * @returns {string} A summary of the most frequent weather condition.
- */
-function getWeatherDescription(codes) {
-    const codeCounts = codes.reduce((acc, code) => {
-        acc[code] = (acc[code] || 0) + 1;
-        return acc;
-    }, {});
-    const mostFrequentCode = Object.keys(codeCounts).reduce((a, b) => codeCounts[a] > codeCounts[b] ? a : b);
-
-    const descriptions = {
-        0: "clear skies", 1: "clear skies", 2: "partial clouds", 3: "clouds", 
-        61: "rain", 63: "rain", 65: "heavy rain",
-        80: "showers", 81: "showers", 82: "heavy showers", 95: "thunderstorms"
-    };
-    return descriptions[mostFrequentCode] || "varied conditions";
-}
 
 /**
  * Sends a request to the OpenAI API to get a recommendation.
@@ -135,10 +115,10 @@ function getWeatherDescription(codes) {
 async function getOpenAiRecommendation(prompt, apiKey) {
     return new Promise((resolve, reject) => {
         const payload = JSON.stringify({
-            model: "gpt-4o",
+            model: "gpt-5-mini",
             messages: [{ role: "user", content: prompt }],
-            max_tokens: 450,
-            temperature: 0.4,
+            max_tokens: 1024, // Increased from 450 to allow for longer, more detailed responses
+            temperature: 0.2,
         });
 
         const options = {
@@ -173,3 +153,4 @@ async function getOpenAiRecommendation(prompt, apiKey) {
         req.end();
     });
 }
+
