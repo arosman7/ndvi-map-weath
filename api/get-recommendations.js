@@ -117,7 +117,7 @@ async function getOpenAiRecommendation(prompt, apiKey) {
         const payload = JSON.stringify({
             model: "gpt-5",
             messages: [{ role: "user", content: prompt }],
-            reasoning={"effort": "minimal"},
+            reasoning={effort: "minimal"},
             
             
         });
