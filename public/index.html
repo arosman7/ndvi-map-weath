@@ -19,19 +19,22 @@
         #map { height: 100vh; width: 100%; cursor: crosshair; background: #1a202c; }
         body { font-family: 'Inter', sans-serif; overflow: hidden; }
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+        
         #info-panel::-webkit-scrollbar { width: 6px; }
-        #info-panel::-webkit-scrollbar-track { background: #2d3748; }
-        #info-panel::-webkit-scrollbar-thumb { background: #4a5568; border-radius: 3px; }
-        .lang-btn.active { background-color: #38b2ac; color: white; }
+        #info-panel::-webkit-scrollbar-track { background: #006837; }
+        #info-panel::-webkit-scrollbar-thumb { background: #587969; border-radius: 3px; }
+        
+        .lang-btn.active { background-color: #006837; color: white; }
         .ol-attribution { display: none; }
-        .toggle-checkbox:checked { right: 0; border-color: #38b2ac; }
-        .toggle-checkbox:checked + .toggle-label { background-color: #38b2ac; }
+        
+        .toggle-checkbox:checked { right: 0; border-color: #006837; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #006837; }
         
         /* Styles for the recommendation drawer */
         #recommendation-drawer {
             transform: translateY(110%);
             transition: transform 0.4s ease-in-out;
-            max-height: 60vh; /* Increased max-height */
+            max-height: 60vh; 
             overflow-y: auto;
         }
         #recommendation-drawer.visible {
@@ -41,79 +44,66 @@
         /* Styles for Markdown content */
         #recommendation-container { 
             line-height: 1.6; 
-            text-align: left; /* Align text to the left for better readability */
+            text-align: left;
         }
         #recommendation-container h1,
         #recommendation-container h2,
         #recommendation-container h3 {
             font-size: 1.25rem;
             font-weight: bold;
-            color: #90cdf4; /* Lighter blue */
+            color: #9ae6b4; /* Light Green */
             margin-top: 1rem;
             margin-bottom: 0.5rem;
-            border-bottom: 1px solid #4a5568;
+            border-bottom: 1px solid #587969;
             padding-bottom: 0.25rem;
         }
-        #recommendation-container p {
-            margin-bottom: 0.75rem;
-        }
-        #recommendation-container ul {
-            list-style-type: disc;
-            margin-left: 1.5rem;
-            margin-bottom: 1rem;
-        }
-        #recommendation-container li {
-            margin-bottom: 0.25rem;
-        }
-        #recommendation-container strong {
-            color: #e2e8f0; /* Lighter gray for emphasis */
-            font-weight: 600;
-        }
-        #recommendation-container code {
-            background-color: #2d3748;
-            padding: 0.1rem 0.3rem;
-            border-radius: 0.25rem;
-            font-family: monospace;
-        }
+        #recommendation-container p { margin-bottom: 0.75rem; }
+        #recommendation-container ul { list-style-type: disc; margin-left: 1.5rem; margin-bottom: 1rem; }
+        #recommendation-container li { margin-bottom: 0.25rem; }
+        #recommendation-container strong { color: #e2e8f0; font-weight: 600; }
 
     </style>
 </head>
-<body class="bg-gray-900 text-white">
+<body class="bg-green-900 text-white">
     
     <div id="map" class="relative">
         <!-- Main Information Panel (Left Side) -->
-        <div id="info-panel" class="absolute top-4 left-4 z-[1000] w-full max-w-sm p-4 bg-gray-800 bg-opacity-80 backdrop-blur-sm rounded-lg shadow-2xl transition-all duration-300 max-h-[calc(100vh-2rem)] overflow-y-auto">
+        <div id="info-panel" class="absolute top-4 left-4 z-[1000] w-full max-w-sm p-4 bg-green-900 bg-opacity-80 backdrop-blur-sm rounded-lg shadow-2xl transition-all duration-300 max-h-[calc(100vh-2rem)] overflow-y-auto">
             
-            <div class="absolute top-3 right-3 flex space-x-1 bg-gray-700 rounded-lg p-1">
+            <div class="flex justify-center mb-4">
+                <img src="logo-main.png" alt="KazNARU Logo" class="h-16"/>
+            </div>
+            
+            <div class="absolute top-3 right-3 flex space-x-1 bg-green-800 rounded-lg p-1">
                 <button id="lang-kk" class="lang-btn px-2 py-1 text-xs font-semibold rounded-md transition-colors">ҚАЗ</button>
                 <button id="lang-ru" class="lang-btn px-2 py-1 text-xs font-semibold rounded-md transition-colors">РУС</button>
             </div>
 
-            <h1 data-translate-key="title" class="text-xl font-bold text-cyan-400 mb-2 text-center"></h1>
-            <p data-translate-key="subtitle" class="text-gray-300 text-sm mb-3 text-center"></p>
+            <h1 data-translate-key="title" class="text-xl font-bold text-green-300 mb-2 text-center"></h1>
+            <p data-translate-key="subtitle" class="text-green-100 text-sm mb-3 text-center"></p>
             
-            <div class="bg-gray-900 rounded-md p-3 text-lg font-mono tracking-wider text-green-400 text-center mb-3">
+            <div class="bg-green-800 rounded-md p-3 text-lg font-mono tracking-wider text-green-300 text-center mb-3">
                 <span id="coords"></span>
             </div>
             
             <!-- NDVI Section -->
             <div class="mb-4">
-                <h2 data-translate-key="ndvi_title" class="text-lg font-semibold text-cyan-300 mb-2"></h2>
-                <div class="bg-gray-900 rounded-md p-3 space-y-3">
+                <h2 data-translate-key="ndvi_title" class="text-lg font-semibold text-green-300 mb-2"></h2>
+                <div class="bg-green-800 rounded-md p-3 space-y-3">
                     <div class="flex items-center justify-between">
-                        <span data-translate-key="show_ndvi_layer" class="text-gray-200"></span>
+                        <span data-translate-key="show_ndvi_layer" class="text-green-100"></span>
                         <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
                             <input type="checkbox" name="toggle" id="ndvi-toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
                             <label for="ndvi-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer"></label>
                         </div>
                     </div>
-                    <div class="flex items-center justify-between pt-2 border-t border-gray-700">
-                        <span data-translate-key="ndvi_value" class="text-gray-200"></span>
-                        <span id="ndvi-value-display" class="font-mono text-lg text-green-400">-</span>
+                    <div class="flex items-center justify-between pt-2 border-t border-green-700">
+                        <span data-translate-key="ndvi_value" class="text-green-100"></span>
+                        <span id="ndvi-value-display" class="font-mono text-lg text-green-300">-</span>
                     </div>
                     <div id="ndvi-legend" class="hidden mt-3">
                         <div class="w-full h-4 rounded-md bg-gradient-to-r from-yellow-800 via-yellow-500 to-green-500"></div>
-                        <div class="flex justify-between text-xs text-gray-400 mt-1">
+                        <div class="flex justify-between text-xs text-green-200 mt-1">
                             <span data-translate-key="low"></span>
                             <span data-translate-key="high"></span>
                         </div>
@@ -123,22 +113,22 @@
 
             <!-- Get Recommendations Button -->
             <div class="mb-4">
-                 <h2 data-translate-key="recommendation_title" class="text-lg font-semibold text-cyan-300 mb-2"></h2>
-                 <button id="get-recs-btn" data-translate-key="get_recs_btn" class="w-full bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded-md transition-colors"></button>
+                 <h2 data-translate-key="recommendation_title" class="text-lg font-semibold text-green-300 mb-2"></h2>
+                 <button id="get-recs-btn" data-translate-key="get_recs_btn" class="w-full bg-green-700 hover:bg-green-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded-md transition-colors"></button>
             </div>
 
             <!-- Weather Section -->
             <div class="mb-4">
-                <h2 data-translate-key="current_weather_title" class="text-lg font-semibold text-cyan-300 mb-2"></h2>
-                <div id="weather-container" class="bg-gray-900 rounded-md p-3 text-base text-gray-200 min-h-[100px] flex items-center justify-center">
+                <h2 data-translate-key="current_weather_title" class="text-lg font-semibold text-green-300 mb-2"></h2>
+                <div id="weather-container" class="bg-green-800 rounded-md p-3 text-base text-green-100 min-h-[100px] flex items-center justify-center">
                     <p data-translate-key="weather_placeholder" class="text-center text-gray-400"></p>
                 </div>
             </div>
 
             <!-- Forecast Section -->
             <div class="mb-4">
-                <h2 data-translate-key="forecast_title" class="text-lg font-semibold text-cyan-300 mb-2"></h2>
-                <div id="forecast-container" class="bg-gray-900 rounded-md p-3 min-h-[150px] flex flex-col justify-center">
+                <h2 data-translate-key="forecast_title" class="text-lg font-semibold text-green-300 mb-2"></h2>
+                <div id="forecast-container" class="bg-green-800 rounded-md p-3 min-h-[150px] flex flex-col justify-center">
                      <p data-translate-key="forecast_placeholder" class="text-center text-gray-400"></p>
                 </div>
             </div>
@@ -147,12 +137,12 @@
     </div>
     
     <!-- New Recommendation Drawer (Bottom of Screen) -->
-    <div id="recommendation-drawer" class="fixed bottom-0 left-0 right-0 z-[1050] bg-gray-900 bg-opacity-90 backdrop-blur-sm shadow-2xl rounded-t-lg p-4 w-full md:w-3/4 lg:w-1/2 mx-auto">
+    <div id="recommendation-drawer" class="fixed bottom-0 left-0 right-0 z-[1050] bg-green-900 bg-opacity-95 backdrop-blur-sm shadow-2xl rounded-t-lg p-4 w-full md:w-3/4 lg:w-1/2 mx-auto">
         <div class="flex justify-between items-center mb-3">
-            <h2 data-translate-key="recommendation_title" class="text-xl font-bold text-cyan-300"></h2>
+            <h2 data-translate-key="recommendation_title" class="text-xl font-bold text-green-300"></h2>
             <button id="close-recs-btn" class="text-gray-400 hover:text-white text-3xl font-bold leading-none">&times;</button>
         </div>
-        <div id="recommendation-container" class="p-3 bg-gray-800 rounded-md min-h-[150px]">
+        <div id="recommendation-container" class="p-3 bg-green-800 rounded-md min-h-[150px]">
             <p data-translate-key="recs_placeholder" class="text-center text-gray-400"></p>
         </div>
     </div>
@@ -215,7 +205,7 @@
                 const humidity = Math.round(daily.relative_humidity_2m_mean[i]);
 
                 const item = document.createElement('div'); 
-                item.className = 'bg-gray-800 rounded-lg p-2 space-y-2 mb-2 transition-all hover:bg-gray-700'; 
+                item.className = 'bg-green-700 rounded-lg p-2 space-y-2 mb-2 transition-all hover:bg-green-600'; 
                 item.innerHTML = `
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
@@ -230,7 +220,7 @@
                             <p class="text-gray-400">${minTemp}°</p>
                         </div>
                     </div>
-                    <div class="grid grid-cols-3 gap-2 text-center text-sm pt-2 border-t border-gray-700">
+                    <div class="grid grid-cols-3 gap-2 text-center text-sm pt-2 border-t border-green-800">
                         <div>
                             <p class="text-xs text-gray-400" data-translate-key="precip">${translations[currentLang].precip}</p>
                             <p class="font-semibold">${precip} mm</p>
@@ -251,7 +241,7 @@
         
         // --- MAP LOGIC ---
         const markerSource = new ol.source.Vector();
-        const markerLayer = new ol.layer.Vector({ source: markerSource, style: new ol.style.Style({ image: new ol.style.Icon({ anchor: [0.5, 1], src: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32"><path fill="%2338b2ac" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>` }) }), });
+        const markerLayer = new ol.layer.Vector({ source: markerSource, style: new ol.style.Style({ image: new ol.style.Icon({ anchor: [0.5, 1], src: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32"><path fill="%236ECB63" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>` }) }), });
         const ndviLayer = new ol.layer.Tile({ source: new ol.source.XYZ({ url: '/api/get-ndvi-tiles?z={z}&x={x}&y={y}', attributions: 'NDVI © Google Earth Engine' }), opacity: 0.7, visible: false });
         const map = new ol.Map({ target: 'map', layers: [ new ol.layer.Tile({ source: new ol.source.XYZ({ url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}' }) }), ndviLayer, markerLayer ], view: new ol.View({ center: ol.proj.fromLonLat([69.14, 54.87]), zoom: 7 }), controls: [], });
 
