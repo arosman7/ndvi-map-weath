@@ -23,12 +23,28 @@
         .ol-attribution { display: none; }
         .toggle-checkbox:checked { right: 0; border-color: #38b2ac; }
         .toggle-checkbox:checked + .toggle-label { background-color: #38b2ac; }
-        #recommendation-container { white-space: pre-wrap; line-height: 1.6; }
+        
+        /* Styles for the new recommendation drawer */
+        #recommendation-drawer {
+            transform: translateY(110%);
+            transition: transform 0.4s ease-in-out;
+            max-height: 50vh; /* Limit height to 50% of the viewport height */
+            overflow-y: auto;
+        }
+        #recommendation-drawer.visible {
+            transform: translateY(0);
+        }
+        #recommendation-container { 
+            white-space: pre-wrap; 
+            line-height: 1.6; 
+            word-wrap: break-word;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-white">
     
     <div id="map" class="relative">
+        <!-- Main Information Panel (Left Side) -->
         <div id="info-panel" class="absolute top-4 left-4 z-[1000] w-full max-w-sm p-4 bg-gray-800 bg-opacity-80 backdrop-blur-sm rounded-lg shadow-2xl transition-all duration-300 max-h-[calc(100vh-2rem)] overflow-y-auto">
             
             <div class="absolute top-3 right-3 flex space-x-1 bg-gray-700 rounded-lg p-1">
@@ -68,6 +84,12 @@
                 </div>
             </div>
 
+            <!-- Get Recommendations Button -->
+            <div class="mb-4">
+                 <h2 data-translate-key="recommendation_title" class="text-lg font-semibold text-cyan-300 mb-2"></h2>
+                 <button id="get-recs-btn" data-translate-key="get_recs_btn" class="w-full bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded-md transition-colors"></button>
+            </div>
+
             <!-- Weather Section -->
             <div class="mb-4">
                 <h2 data-translate-key="current_weather_title" class="text-lg font-semibold text-cyan-300 mb-2"></h2>
@@ -77,32 +99,33 @@
             </div>
 
             <!-- Forecast Section -->
-            <div>
+            <div class="mb-4">
                 <h2 data-translate-key="forecast_title" class="text-lg font-semibold text-cyan-300 mb-2"></h2>
                 <div id="forecast-container" class="bg-gray-900 rounded-md p-3 space-y-2 min-h-[150px] flex flex-col justify-center">
                      <p data-translate-key="forecast_placeholder" class="text-center text-gray-400"></p>
                 </div>
             </div>
 
-            <!-- New Recommendation Section -->
-            <div class="mt-4">
-                <h2 data-translate-key="recommendation_title" class="text-lg font-semibold text-cyan-300 mb-2"></h2>
-                <div class="bg-gray-900 rounded-md p-3 space-y-3">
-                    <button id="get-recs-btn" data-translate-key="get_recs_btn" class="w-full bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded-md transition-colors"></button>
-                    <div id="recommendation-container" class="mt-3 p-3 bg-gray-700 rounded-md min-h-[150px] flex items-center justify-center">
-                        <p data-translate-key="recs_placeholder" class="text-center text-gray-400"></p>
-                    </div>
-                </div>
-            </div>
-
         </div>
     </div>
+    
+    <!-- New Recommendation Drawer (Bottom of Screen) -->
+    <div id="recommendation-drawer" class="fixed bottom-0 left-0 right-0 z-[1050] bg-gray-900 bg-opacity-90 backdrop-blur-sm shadow-2xl rounded-t-lg p-4 w-full md:w-3/4 lg:w-1/2 mx-auto">
+        <div class="flex justify-between items-center mb-3">
+            <h2 data-translate-key="recommendation_title" class="text-xl font-bold text-cyan-300"></h2>
+            <button id="close-recs-btn" class="text-gray-400 hover:text-white text-3xl font-bold leading-none">&times;</button>
+        </div>
+        <div id="recommendation-container" class="p-3 bg-gray-800 rounded-md min-h-[150px] flex items-center justify-center">
+            <p data-translate-key="recs_placeholder" class="text-center text-gray-400"></p>
+        </div>
+    </div>
+
 
     <script>
         // --- START: SHARED LOGIC & STATE ---
         const translations = {
-            kk: { title: "Спутниктік Агро болжағыш", subtitle: "Координаттар мен ауа райы болжамын алу үшін картаны басыңыз.", coords_placeholder: "Картаны басыңыз...", current_weather_title: "Ағымдағы ауа-райы", forecast_title: "16 күндік болжам", weather_placeholder: "Ауа-райы деректері осында пайда болады.", forecast_placeholder: "Болжам деректері осында пайда болады.", fetching_current: "Ағымдағы ауа-райы алынуда...", fetching_forecast: "Болжам алынуда...", error_current: "Ағымдағы ауа-райын алу мүмкін болмады.", error_forecast: "Болжамды алу мүмкін болмады.", temp: "Темп", humidity: "Ылғалдылық", precip: "Жауын", wind: "Жел", ndvi_title: "Өсімдік индексі (NDVI)", show_ndvi_layer: "NDVI қабатын көрсету", low: "Төмен", high: "Жоғары", ndvi_value: "Нүктедегі мән:", fetching_ndvi: "Алынуда...", ndvi_no_data: "Деректер жоқ", recommendation_title: "Агрономдық ұсыныстар", get_recs_btn: "Ұсыныстар алу", recs_placeholder: "Ұсыныстар осында пайда болады. Картаны басып, содан кейін түймені басыңыз.", fetching_recs: "Ұсыныстар жасалуда...", error_recs: "Ұсыныстарды алу мүмкін болмады.", click_map_first: "Алдымен картадағы нүктені таңдаңыз!", weather_codes: { 0: "Ашық аспан", 1: "Негізінен ашық", 2: "Жартылай бұлтты", 3: "Бұлтты", 45: "Тұман", 48: "Қыраулы тұман", 51: "Жеңіл сіркіреу", 53: "Сіркіреу", 55: "Қою сіркіреу", 61: "Жеңіл жаңбыр", 63: "Жаңбыр", 65: "Нөсер жаңбыр", 80: "Жеңіл жауын", 81: "Жауын", 82: "Қатты жауын", 95: "Найзағай" } },
-            ru: { title: "Спутниковый Агро Прогноз", subtitle: "Нажмите на карту, чтобы получить координаты и прогноз погоды.", coords_placeholder: "Нажмите на карту...", current_weather_title: "Текущая погода", forecast_title: "Прогноз на 16 дней", weather_placeholder: "Данные о погоде появятся здесь.", forecast_placeholder: "Данные прогноза появятся здесь.", fetching_current: "Получение текущей погоды...", fetching_forecast: "Получение прогноза...", error_current: "Не удалось получить текущую погоду.", error_forecast: "Не удалось получить прогноз.", temp: "Темп", humidity: "Влажность", precip: "Осадки", wind: "Ветер", ndvi_title: "Индекс Растительности (NDVI)", show_ndvi_layer: "Показать слой NDVI", low: "Низкий", high: "Высокий", ndvi_value: "Значение в точке:", fetching_ndvi: "Получение...", ndvi_no_data: "Нет данных", recommendation_title: "Агрономические рекомендации", get_recs_btn: "Получить рекомендации", recs_placeholder: "Рекомендации появятся здесь. Нажмите на карту, а затем на кнопку.", fetching_recs: "Генерация рекомендаций...", error_recs: "Не удалось получить рекомендации.", click_map_first: "Сначала выберите точку на карте!", weather_codes: { 0: "Чистое небо", 1: "В основном ясно", 2: "Переменная облачность", 3: "Пасмурно", 45: "Туман", 48: "Изморозь", 51: "Легкая морось", 53: "Морось", 55: "Густая морось", 61: "Небольшой дождь", 63: "Дождь", 65: "Сильный дождь", 80: "Небольшие ливни", 81: "Ливни", 82: "Сильные ливни", 95: "Гроза" } }
+            kk: { title: "Спутниктік Агро болжағыш", subtitle: "Координаттар мен ауа райы болжамын алу үшін картаны басыңыз.", coords_placeholder: "Картаны басыңыз...", current_weather_title: "Ағымдағы ауа-райы", forecast_title: "16 күндік болжам", weather_placeholder: "Ауа-райы деректері осында пайда болады.", forecast_placeholder: "Болжам деректері осында пайда болады.", fetching_current: "Ағымдағы ауа-райы алынуда...", fetching_forecast: "Болжам алынуда...", error_current: "Ағымдағы ауа-райын алу мүмкін болмады.", error_forecast: "Болжамды алу мүмкін болмады.", temp: "Темп", humidity: "Ылғалдылық", precip: "Жауын", wind: "Жел", ndvi_title: "Өсімдік индексі (NDVI)", show_ndvi_layer: "NDVI қабатын көрсету", low: "Төмен", high: "Жоғары", ndvi_value: "Нүктедегі мән:", fetching_ndvi: "Алынуда...", ndvi_no_data: "Деректер жоқ", recommendation_title: "Агрономдық ұсыныстар", get_recs_btn: "Ұсыныстар алу", recs_placeholder: "Ұсыныстар алу үшін жоғарыдағы түймені басыңыз.", fetching_recs: "Ұсыныстар жасалуда...", error_recs: "Ұсыныстарды алу мүмкін болмады.", click_map_first: "Алдымен картадағы нүктені таңдаңыз!", weather_codes: { 0: "Ашық аспан", 1: "Негізінен ашық", 2: "Жартылай бұлтты", 3: "Бұлтты", 45: "Тұман", 48: "Қыраулы тұман", 51: "Жеңіл сіркіреу", 53: "Сіркіреу", 55: "Қою сіркіреу", 61: "Жеңіл жаңбыр", 63: "Жаңбыр", 65: "Нөсер жаңбыр", 80: "Жеңіл жауын", 81: "Жауын", 82: "Қатты жауын", 95: "Найзағай" } },
+            ru: { title: "Спутниковый Агро Прогноз", subtitle: "Нажмите на карту, чтобы получить координаты и прогноз погоды.", coords_placeholder: "Нажмите на карту...", current_weather_title: "Текущая погода", forecast_title: "Прогноз на 16 дней", weather_placeholder: "Данные о погоде появятся здесь.", forecast_placeholder: "Данные прогноза появятся здесь.", fetching_current: "Получение текущей погоды...", fetching_forecast: "Получение прогноза...", error_current: "Не удалось получить текущую погоду.", error_forecast: "Не удалось получить прогноз.", temp: "Темп", humidity: "Влажность", precip: "Осадки", wind: "Ветер", ndvi_title: "Индекс Растительности (NDVI)", show_ndvi_layer: "Показать слой NDVI", low: "Низкий", high: "Высокий", ndvi_value: "Значение в точке:", fetching_ndvi: "Получение...", ndvi_no_data: "Нет данных", recommendation_title: "Агрономические рекомендации", get_recs_btn: "Получить рекомендации", recs_placeholder: "Нажмите кнопку выше, чтобы получить рекомендации.", fetching_recs: "Генерация рекомендаций...", error_recs: "Не удалось получить рекомендации.", click_map_first: "Сначала выберите точку на карте!", weather_codes: { 0: "Чистое небо", 1: "В основном ясно", 2: "Переменная облачность", 3: "Пасмурно", 45: "Туман", 48: "Изморозь", 51: "Легкая морось", 53: "Морось", 55: "Густая морось", 61: "Небольшой дождь", 63: "Дождь", 65: "Сильный дождь", 80: "Небольшие ливни", 81: "Ливни", 82: "Сильные ливни", 95: "Гроза" } }
         };
 
         let currentLang = 'kk';
@@ -120,7 +143,9 @@
             ndviLegend: document.getElementById('ndvi-legend'), 
             ndviValue: document.getElementById('ndvi-value-display'),
             recsBtn: document.getElementById('get-recs-btn'),
-            recsContainer: document.getElementById('recommendation-container')
+            recsContainer: document.getElementById('recommendation-container'),
+            recsDrawer: document.getElementById('recommendation-drawer'),
+            closeRecsBtn: document.getElementById('close-recs-btn')
         };
         
         // --- UI & TRANSLATION FUNCTIONS ---
@@ -150,6 +175,7 @@
                 alert(translations[currentLang].click_map_first);
                 return;
             }
+            ui.recsDrawer.classList.add('visible');
             ui.recsContainer.innerHTML = `<p class="text-center text-yellow-400">${translations[currentLang].fetching_recs}</p>`;
             ui.recsBtn.disabled = true;
             try {
@@ -180,6 +206,9 @@
         ui.langKk.addEventListener('click', () => setLanguage('kk'));
         ui.langRu.addEventListener('click', () => setLanguage('ru'));
         ui.recsBtn.addEventListener('click', fetchRecommendations);
+        ui.closeRecsBtn.addEventListener('click', () => {
+            ui.recsDrawer.classList.remove('visible');
+        });
 
         // --- INITIALIZATION ---
         setLanguage('kk');
