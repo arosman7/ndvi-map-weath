@@ -115,9 +115,10 @@ function interpretNdvi(ndvi) {
 async function getOpenAiRecommendation(prompt, apiKey) {
     return new Promise((resolve, reject) => {
         const payload = JSON.stringify({
-            model: "gpt-5-mini",
+            model: "gpt-5",
             messages: [{ role: "user", content: prompt }],
-            max_completion_tokens: 10024, // Increased from 450 to allow for longer, more detailed responses
+            reasoning={"effort": "minimal"},
+            
             
         });
 
