@@ -18,7 +18,7 @@ module.exports = async (req, res) => {
         const mapId = await getMapId(image, visParams);
         
         // The URL format from getMapId contains {x}, {y}, {z} placeholders.
-        // We need to replace them with the actual values from the request query.
+        // We replace them with the actual values from the request query.
         const { x, y, z } = req.query;
         const tileUrl = mapId.urlFormat.replace('{x}', x).replace('{y}', y).replace('{z}', z);
 
@@ -29,27 +29,20 @@ module.exports = async (req, res) => {
             hostname: parsedUrl.hostname,
             path: parsedUrl.path,
             method: 'GET',
-            headers: {
-                'User-Agent': req.headers['user-agent'] // Pass on the user-agent
-            }
+            headers: { 'User-Agent': req.headers['user-agent'] }
         };
 
         const proxyReq = https.request(options, (proxyRes) => {
             res.writeHead(proxyRes.statusCode, proxyRes.headers);
-            proxyRes.pipe(res, {
-                end: true
-            });
+            proxyRes.pipe(res, { end: true });
         });
 
-        req.pipe(proxyReq, {
-            end: true
-        });
+        req.pipe(proxyReq, { end: true });
 
         proxyReq.on('error', (e) => {
             console.error('Proxy request error:', e);
             res.status(500).send('Failed to proxy tile request');
         });
-
 
     } catch (error) {
         console.error('GEE Tile Error:', error.message);
@@ -70,10 +63,7 @@ const authenticateAndInitialize = () => new Promise((resolve, reject) => {
 });
 
 const getNdviImage = () => {
-    // **OPTIMIZATION**: Define a large bounding box roughly covering Central Asia/Kazakhstan
-    // instead of searching the entire planet. Coordinates are [minLon, minLat, maxLon, maxLat].
-    const regionOfInterest = ee.Geometry.Rectangle([45, 40, 90, 56]);
-
+    const regionOfInterest = ee.Geometry.Rectangle([45, 40, 90, 56]); // Central Asia
     const s2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED');
 
     const maskS2clouds = (image) => {
@@ -85,7 +75,7 @@ const getNdviImage = () => {
     };
 
     const recentImage = s2
-        .filterBounds(regionOfInterest) // Apply the regional filter
+        .filterBounds(regionOfInterest)
         .filterDate(ee.Date(Date.now()).advance(-120, 'day'), ee.Date(Date.now()))
         .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 20))
         .map(maskS2clouds)
