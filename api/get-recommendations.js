@@ -117,7 +117,7 @@ async function getOpenAiRecommendation(prompt, apiKey) {
         const payload = JSON.stringify({
             model: "gpt-5-mini",
             messages: [{ role: "user", content: prompt }],
-            max_tokens: 1024, // Increased from 450 to allow for longer, more detailed responses
+            max_completion_tokens: 1024, // Increased from 450 to allow for longer, more detailed responses
             temperature: 0.2,
         });
 
