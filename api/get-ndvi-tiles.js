@@ -1,4 +1,6 @@
 const ee = require('@google/earthengine');
+const https = require('https');
+const url = require('url');
 
 // Main handler for the serverless function
 module.exports = async (req, res) => {
@@ -20,8 +22,34 @@ module.exports = async (req, res) => {
         const { x, y, z } = req.query;
         const tileUrl = mapId.urlFormat.replace('{x}', x).replace('{y}', y).replace('{z}', z);
 
-        // Redirect the client to the actual Google tile server URL
-        res.redirect(302, tileUrl);
+        // Proxy the tile request from Google's servers to the client.
+        const parsedUrl = url.parse(tileUrl);
+
+        const options = {
+            hostname: parsedUrl.hostname,
+            path: parsedUrl.path,
+            method: 'GET',
+            headers: {
+                'User-Agent': req.headers['user-agent'] // Pass on the user-agent
+            }
+        };
+
+        const proxyReq = https.request(options, (proxyRes) => {
+            res.writeHead(proxyRes.statusCode, proxyRes.headers);
+            proxyRes.pipe(res, {
+                end: true
+            });
+        });
+
+        req.pipe(proxyReq, {
+            end: true
+        });
+
+        proxyReq.on('error', (e) => {
+            console.error('Proxy request error:', e);
+            res.status(500).send('Failed to proxy tile request');
+        });
+
 
     } catch (error) {
         console.error('GEE Tile Error:', error.message);
@@ -73,4 +101,3 @@ const getMapId = (image, visParams) => new Promise((resolve, reject) => {
         resolve(mapId);
     });
 });
-
