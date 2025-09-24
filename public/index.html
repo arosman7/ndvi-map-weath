@@ -23,6 +23,7 @@
         .ol-attribution { display: none; }
         .toggle-checkbox:checked { right: 0; border-color: #38b2ac; }
         .toggle-checkbox:checked + .toggle-label { background-color: #38b2ac; }
+        #recommendation-container { white-space: pre-wrap; line-height: 1.6; }
     </style>
 </head>
 <body class="bg-gray-900 text-white">
@@ -42,6 +43,7 @@
                 <span id="coords"></span>
             </div>
             
+            <!-- NDVI Section -->
             <div class="mb-4">
                 <h2 data-translate-key="ndvi_title" class="text-lg font-semibold text-cyan-300 mb-2"></h2>
                 <div class="bg-gray-900 rounded-md p-3 space-y-3">
@@ -66,6 +68,7 @@
                 </div>
             </div>
 
+            <!-- Weather Section -->
             <div class="mb-4">
                 <h2 data-translate-key="current_weather_title" class="text-lg font-semibold text-cyan-300 mb-2"></h2>
                 <div id="weather-container" class="bg-gray-900 rounded-md p-3 text-base text-gray-200 min-h-[100px] flex items-center justify-center">
@@ -73,6 +76,7 @@
                 </div>
             </div>
 
+            <!-- Forecast Section -->
             <div>
                 <h2 data-translate-key="forecast_title" class="text-lg font-semibold text-cyan-300 mb-2"></h2>
                 <div id="forecast-container" class="bg-gray-900 rounded-md p-3 space-y-2 min-h-[150px] flex flex-col justify-center">
@@ -80,21 +84,46 @@
                 </div>
             </div>
 
+            <!-- New Recommendation Section -->
+            <div class="mt-4">
+                <h2 data-translate-key="recommendation_title" class="text-lg font-semibold text-cyan-300 mb-2"></h2>
+                <div class="bg-gray-900 rounded-md p-3 space-y-3">
+                    <button id="get-recs-btn" data-translate-key="get_recs_btn" class="w-full bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded-md transition-colors"></button>
+                    <div id="recommendation-container" class="mt-3 p-3 bg-gray-700 rounded-md min-h-[150px] flex items-center justify-center">
+                        <p data-translate-key="recs_placeholder" class="text-center text-gray-400"></p>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
     <script>
-        // --- START: SHARED LOGIC ---
+        // --- START: SHARED LOGIC & STATE ---
         const translations = {
-            kk: { title: "Спутниктік Агро болжағыш", subtitle: "Координаттар мен ауа райы болжамын алу үшін картаны басыңыз.", coords_placeholder: "Картаны басыңыз...", current_weather_title: "Ағымдағы ауа-райы", forecast_title: "16 күндік болжам", weather_placeholder: "Ауа-райы деректері осында пайда болады.", forecast_placeholder: "Болжам деректері осында пайда болады.", fetching_current: "Ағымдағы ауа-райы алынуда...", fetching_forecast: "Болжам алынуда...", error_current: "Ағымдағы ауа-райын алу мүмкін болмады.", error_forecast: "Болжамды алу мүмкін болмады.", temp: "Темп", humidity: "Ылғалдылық", precip: "Жауын", wind: "Жел", ndvi_title: "Өсімдік индексі (NDVI)", show_ndvi_layer: "NDVI қабатын көрсету", low: "Төмен", high: "Жоғары", ndvi_value: "Нүктедегі мән:", fetching_ndvi: "Алынуда...", ndvi_no_data: "Деректер жоқ", weather_codes: { 0: "Ашық аспан", 1: "Негізінен ашық", 2: "Жартылай бұлтты", 3: "Бұлтты", 45: "Тұман", 48: "Қыраулы тұман", 51: "Жеңіл сіркіреу", 53: "Сіркіреу", 55: "Қою сіркіреу", 61: "Жеңіл жаңбыр", 63: "Жаңбыр", 65: "Нөсер жаңбыр", 80: "Жеңіл жауын", 81: "Жауын", 82: "Қатты жауын", 95: "Найзағай" } },
-            ru: { title: "Спутниковый Агро Прогноз", subtitle: "Нажмите на карту, чтобы получить координаты и прогноз погоды.", coords_placeholder: "Нажмите на карту...", current_weather_title: "Текущая погода", forecast_title: "Прогноз на 16 дней", weather_placeholder: "Данные о погоде появятся здесь.", forecast_placeholder: "Данные прогноза появятся здесь.", fetching_current: "Получение текущей погоды...", fetching_forecast: "Получение прогноза...", error_current: "Не удалось получить текущую погоду.", error_forecast: "Не удалось получить прогноз.", temp: "Темп", humidity: "Влажность", precip: "Осадки", wind: "Ветер", ndvi_title: "Индекс Растительности (NDVI)", show_ndvi_layer: "Показать слой NDVI", low: "Низкий", high: "Высокий", ndvi_value: "Значение в точке:", fetching_ndvi: "Получение...", ndvi_no_data: "Нет данных", weather_codes: { 0: "Чистое небо", 1: "В основном ясно", 2: "Переменная облачность", 3: "Пасмурно", 45: "Туман", 48: "Изморозь", 51: "Легкая морось", 53: "Морось", 55: "Густая морось", 61: "Небольшой дождь", 63: "Дождь", 65: "Сильный дождь", 80: "Небольшие ливни", 81: "Ливни", 82: "Сильные ливни", 95: "Гроза" } }
+            kk: { title: "Спутниктік Агро болжағыш", subtitle: "Координаттар мен ауа райы болжамын алу үшін картаны басыңыз.", coords_placeholder: "Картаны басыңыз...", current_weather_title: "Ағымдағы ауа-райы", forecast_title: "16 күндік болжам", weather_placeholder: "Ауа-райы деректері осында пайда болады.", forecast_placeholder: "Болжам деректері осында пайда болады.", fetching_current: "Ағымдағы ауа-райы алынуда...", fetching_forecast: "Болжам алынуда...", error_current: "Ағымдағы ауа-райын алу мүмкін болмады.", error_forecast: "Болжамды алу мүмкін болмады.", temp: "Темп", humidity: "Ылғалдылық", precip: "Жауын", wind: "Жел", ndvi_title: "Өсімдік индексі (NDVI)", show_ndvi_layer: "NDVI қабатын көрсету", low: "Төмен", high: "Жоғары", ndvi_value: "Нүктедегі мән:", fetching_ndvi: "Алынуда...", ndvi_no_data: "Деректер жоқ", recommendation_title: "Агрономдық ұсыныстар", get_recs_btn: "Ұсыныстар алу", recs_placeholder: "Ұсыныстар осында пайда болады. Картаны басып, содан кейін түймені басыңыз.", fetching_recs: "Ұсыныстар жасалуда...", error_recs: "Ұсыныстарды алу мүмкін болмады.", click_map_first: "Алдымен картадағы нүктені таңдаңыз!", weather_codes: { 0: "Ашық аспан", 1: "Негізінен ашық", 2: "Жартылай бұлтты", 3: "Бұлтты", 45: "Тұман", 48: "Қыраулы тұман", 51: "Жеңіл сіркіреу", 53: "Сіркіреу", 55: "Қою сіркіреу", 61: "Жеңіл жаңбыр", 63: "Жаңбыр", 65: "Нөсер жаңбыр", 80: "Жеңіл жауын", 81: "Жауын", 82: "Қатты жауын", 95: "Найзағай" } },
+            ru: { title: "Спутниковый Агро Прогноз", subtitle: "Нажмите на карту, чтобы получить координаты и прогноз погоды.", coords_placeholder: "Нажмите на карту...", current_weather_title: "Текущая погода", forecast_title: "Прогноз на 16 дней", weather_placeholder: "Данные о погоде появятся здесь.", forecast_placeholder: "Данные прогноза появятся здесь.", fetching_current: "Получение текущей погоды...", fetching_forecast: "Получение прогноза...", error_current: "Не удалось получить текущую погоду.", error_forecast: "Не удалось получить прогноз.", temp: "Темп", humidity: "Влажность", precip: "Осадки", wind: "Ветер", ndvi_title: "Индекс Растительности (NDVI)", show_ndvi_layer: "Показать слой NDVI", low: "Низкий", high: "Высокий", ndvi_value: "Значение в точке:", fetching_ndvi: "Получение...", ndvi_no_data: "Нет данных", recommendation_title: "Агрономические рекомендации", get_recs_btn: "Получить рекомендации", recs_placeholder: "Рекомендации появятся здесь. Нажмите на карту, а затем на кнопку.", fetching_recs: "Генерация рекомендаций...", error_recs: "Не удалось получить рекомендации.", click_map_first: "Сначала выберите точку на карте!", weather_codes: { 0: "Чистое небо", 1: "В основном ясно", 2: "Переменная облачность", 3: "Пасмурно", 45: "Туман", 48: "Изморозь", 51: "Легкая морось", 53: "Морось", 55: "Густая морось", 61: "Небольшой дождь", 63: "Дождь", 65: "Сильный дождь", 80: "Небольшие ливни", 81: "Ливни", 82: "Сильные ливни", 95: "Гроза" } }
         };
+
         let currentLang = 'kk';
         let lastClickedLatLng = null;
         let lastWeatherData = null;
+        let lastNdviValue = null;
 
-        const ui = { coords: document.getElementById('coords'), weather: document.getElementById('weather-container'), forecast: document.getElementById('forecast-container'), langKk: document.getElementById('lang-kk'), langRu: document.getElementById('lang-ru'), ndviToggle: document.getElementById('ndvi-toggle'), ndviLegend: document.getElementById('ndvi-legend'), ndviValue: document.getElementById('ndvi-value-display') };
+        const ui = { 
+            coords: document.getElementById('coords'), 
+            weather: document.getElementById('weather-container'), 
+            forecast: document.getElementById('forecast-container'), 
+            langKk: document.getElementById('lang-kk'), 
+            langRu: document.getElementById('lang-ru'), 
+            ndviToggle: document.getElementById('ndvi-toggle'), 
+            ndviLegend: document.getElementById('ndvi-legend'), 
+            ndviValue: document.getElementById('ndvi-value-display'),
+            recsBtn: document.getElementById('get-recs-btn'),
+            recsContainer: document.getElementById('recommendation-container')
+        };
         
+        // --- UI & TRANSLATION FUNCTIONS ---
         function setLanguage(lang) {
             currentLang = lang; document.documentElement.lang = lang;
             ui.langKk.classList.toggle('active', lang === 'kk'); ui.langRu.classList.toggle('active', lang === 'ru');
@@ -105,50 +134,42 @@
 
         function getWeatherInfo(code) { const icons = { 0:"☀️", 1:"🌤️", 2:"⛅", 3:"☁️", 45:"🌫️", 48:"🌫️", 51:"💧", 53:"💧", 55:"💧", 61:"🌧️", 63:"🌧️", 65:"🌧️", 80:"🌦️", 81:"🌦️", 82:"🌦️", 95:"⛈️" }; return { description: translations[currentLang].weather_codes[code] || "Unknown", icon: icons[code] || "🤷" }; }
         function displayCurrentWeather(current, units) { if (!current) return; const { description, icon } = getWeatherInfo(current.weather_code); const t = translations[currentLang]; ui.weather.innerHTML = `<div class="grid grid-cols-2 gap-4 w-full"><div class="flex flex-col items-center justify-center text-center col-span-2"><span class="text-4xl">${icon}</span><span class="font-semibold">${description}</span></div><div class="text-center"><span class="text-gray-400 text-sm block">${t.temp}</span><span class="font-bold text-xl">${current.temperature_2m}${units.temperature_2m}</span></div><div class="text-center"><span class="text-gray-400 text-sm block">${t.humidity}</span><span class="font-bold text-xl">${current.relative_humidity_2m}${units.relative_humidity_2m}</span></div><div class="text-center"><span class="text-gray-400 text-sm block">${t.precip}</span><span class="font-bold text-xl">${current.precipitation}${units.precipitation}</span></div><div class="text-center"><span class="text-gray-400 text-sm block">${t.wind}</span><span class="font-bold text-xl">${current.wind_speed_10m} ${units.wind_speed_10m}</span></div></div>`; }
-        function displayForecast(daily) { ui.forecast.innerHTML = ''; if (!daily || !daily.time || daily.time.length === 0) { ui.forecast.innerHTML = `<p class="text-center text-gray-400">${translations[currentLang].forecast_placeholder}</p>`; return; } daily.time.forEach((dateStr, i) => { const date = new Date(dateStr); const locale = currentLang === 'kk' ? 'kk-KZ' : 'ru-RU'; const day = date.toLocaleDateString(locale, { weekday: 'short' }); const { icon } = getWeatherInfo(daily.weather_code[i]); const maxTemp = Math.round(daily.temperature_2m_max[i]); const minTemp = Math.round(daily.temperature_2m_min[i]); const item = document.createElement('div'); item.className = 'flex items-center justify-between p-2 rounded-md hover:bg-gray-700'; item.innerHTML = `<div class="flex items-center gap-3"><span class="text-xl w-8 text-center">${icon}</span><div><p class="font-semibold">${day}</p><p class="text-xs text-gray-400">${`${date.getDate()}/${date.getMonth() + 1}`}</p></div></div><div><span class="font-medium">${maxTemp}°</span><span class="text-gray-400"> / ${minTemp}°</span></div>`; ui.forecast.appendChild(item); }); }
-        ui.langKk.addEventListener('click', () => setLanguage('kk'));
-        ui.langRu.addEventListener('click', () => setLanguage('ru'));
+        function displayForecast(daily) { ui.forecast.innerHTML = ''; if (!daily || !daily.time || daily.time.length === 0) { ui.forecast.innerHTML = `<p class="text-center text-gray-400">${translations[currentLang].forecast_placeholder}</p>`; return; } daily.time.forEach((dateStr, i) => { const date = new Date(dateStr); const locale = currentLang === 'kk' ? 'kk-KZ' : 'ru-RU'; const day = date.toLocaleDate-string(locale, { weekday: 'short' }); const { icon } = getWeatherInfo(daily.weather_code[i]); const maxTemp = Math.round(daily.temperature_2m_max[i]); const minTemp = Math.round(daily.temperature_2m_min[i]); const item = document.createElement('div'); item.className = 'flex items-center justify-between p-2 rounded-md hover:bg-gray-800'; item.innerHTML = `<div class="flex items-center gap-3"><span class="text-xl w-8 text-center">${icon}</span><div><p class="font-semibold">${day}</p><p class="text-xs text-gray-400">${`${date.getDate()}/${date.getMonth() + 1}`}</p></div></div><div><span class="font-medium">${maxTemp}°</span><span class="text-gray-400"> / ${minTemp}°</span></div>`; ui.forecast.appendChild(item); }); }
         
-        // --- START: OPENLAYERS MAP LOGIC ---
+        // --- MAP LOGIC ---
         const markerSource = new ol.source.Vector();
         const markerLayer = new ol.layer.Vector({ source: markerSource, style: new ol.style.Style({ image: new ol.style.Icon({ anchor: [0.5, 1], src: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32"><path fill="%2338b2ac" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>` }) }), });
-
-        // GEE NDVI layer, pointing to our own serverless function
-        const ndviLayer = new ol.layer.Tile({
-            source: new ol.source.XYZ({
-                url: '/api/get-ndvi-tiles?z={z}&x={x}&y={y}', // URL points to our backend
-                attributions: 'NDVI © Google Earth Engine',
-            }),
-            opacity: 0.7,
-            visible: false
-        });
-
+        const ndviLayer = new ol.layer.Tile({ source: new ol.source.XYZ({ url: '/api/get-ndvi-tiles?z={z}&x={x}&y={y}', attributions: 'NDVI © Google Earth Engine' }), opacity: 0.7, visible: false });
         const map = new ol.Map({ target: 'map', layers: [ new ol.layer.Tile({ source: new ol.source.XYZ({ url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}' }) }), ndviLayer, markerLayer ], view: new ol.View({ center: ol.proj.fromLonLat([69.14, 54.87]), zoom: 7 }), controls: [], });
 
-        async function fetchWeatherData(lat, lng) { ui.weather.innerHTML = `<p class="text-center text-yellow-400">${translations[currentLang].fetching_current}</p>`; ui.forecast.innerHTML = `<p class="text-center text-yellow-400">${translations[currentLang].fetching_forecast}</p>`; const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min&forecast_days=16`; try { const response = await fetch(apiUrl); if (!response.ok) throw new Error('Network response failed'); lastWeatherData = await response.json(); displayCurrentWeather(lastWeatherData.current, lastWeatherData.current_units); displayForecast(lastWeatherData.daily); } catch (error) { lastWeatherData = null; ui.weather.innerHTML = `<p class="text-center text-red-400">${translations[currentLang].error_current}</p>`; ui.forecast.innerHTML = `<p class="text-center text-red-400">${translations[currentLang].error_forecast}</p>`; } }
-
-        async function fetchNdviData(lat, lng) {
-            ui.ndviValue.textContent = translations[currentLang].fetching_ndvi;
+        // --- DATA FETCHING ---
+        async function fetchWeatherData(lat, lon) { ui.weather.innerHTML = `<p class="text-center text-yellow-400">${translations[currentLang].fetching_current}</p>`; ui.forecast.innerHTML = `<p class="text-center text-yellow-400">${translations[currentLang].fetching_forecast}</p>`; const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min&forecast_days=16`; try { const response = await fetch(apiUrl); if (!response.ok) throw new Error('Network response failed'); lastWeatherData = await response.json(); displayCurrentWeather(lastWeatherData.current, lastWeatherData.current_units); displayForecast(lastWeatherData.daily); } catch (error) { lastWeatherData = null; ui.weather.innerHTML = `<p class="text-center text-red-400">${translations[currentLang].error_current}</p>`; ui.forecast.innerHTML = `<p class="text-center text-red-400">${translations[currentLang].error_forecast}</p>`; } }
+        async function fetchNdviData(lat, lon) { ui.ndviValue.textContent = translations[currentLang].fetching_ndvi; lastNdviValue = null; try { const response = await fetch(`/api/get-ndvi-value?lat=${lat}&lon=${lon}`); if (!response.ok) throw new Error('Failed to fetch NDVI value'); const data = await response.json(); if (data.ndvi !== null && typeof data.ndvi !== 'undefined') { const ndvi = data.ndvi.toFixed(3); ui.ndviValue.textContent = ndvi; lastNdviValue = ndvi; } else { ui.ndviValue.textContent = translations[currentLang].ndvi_no_data; } } catch (error) { console.error("NDVI Value Fetch Error:", error); ui.ndviValue.textContent = translations[currentLang].ndvi_no_data; } }
+        async function fetchRecommendations() {
+            if (!lastClickedLatLng || !lastWeatherData || !lastNdviValue) {
+                alert(translations[currentLang].click_map_first);
+                return;
+            }
+            ui.recsContainer.innerHTML = `<p class="text-center text-yellow-400">${translations[currentLang].fetching_recs}</p>`;
+            ui.recsBtn.disabled = true;
             try {
-                // FIX: Changed parameter name from 'lng' to 'lon' to match the backend API.
-                const response = await fetch(`/api/get-ndvi-value?lat=${lat}&lon=${lng}`);
-                if (!response.ok) throw new Error('Failed to fetch NDVI value from server');
+                const response = await fetch('/api/get-recommendations', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ lat: lastClickedLatLng.lat, lon: lastClickedLatLng.lng, ndvi: lastNdviValue, weatherData: lastWeatherData, lang: currentLang }), });
+                if (!response.ok) { const errorData = await response.json(); throw new Error(errorData.details || 'Server error'); }
                 const data = await response.json();
-                if (data.ndvi !== null && typeof data.ndvi !== 'undefined') {
-                    ui.ndviValue.textContent = data.ndvi.toFixed(3);
-                } else {
-                    ui.ndviValue.textContent = translations[currentLang].ndvi_no_data;
-                }
+                ui.recsContainer.innerHTML = `<p>${data.recommendation}</p>`;
             } catch (error) {
-                console.error("NDVI Value Fetch Error:", error);
-                ui.ndviValue.textContent = translations[currentLang].ndvi_no_data;
+                console.error("Recommendation Fetch Error:", error);
+                ui.recsContainer.innerHTML = `<p class="text-center text-red-400">${translations[currentLang].error_recs}</p>`;
+            } finally {
+                ui.recsBtn.disabled = false;
             }
         }
 
+        // --- EVENT LISTENERS ---
         map.on('singleclick', function(e) {
             const [lng, lat] = ol.proj.toLonLat(e.coordinate);
             lastClickedLatLng = { lat, lng };
-            ui.coords.innerHTML = `Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`;
+            ui.coords.innerHTML = `Lat: ${lat.toFixed(4)}, Lon: ${lng.toFixed(4)}`;
             markerSource.clear();
             markerSource.addFeature(new ol.Feature({ geometry: new ol.geom.Point(e.coordinate) }));
             fetchWeatherData(lat, lng);
@@ -156,9 +177,14 @@
         });
         
         ui.ndviToggle.addEventListener('change', function() { ndviLayer.setVisible(this.checked); ui.ndviLegend.classList.toggle('hidden', !this.checked); });
+        ui.langKk.addEventListener('click', () => setLanguage('kk'));
+        ui.langRu.addEventListener('click', () => setLanguage('ru'));
+        ui.recsBtn.addEventListener('click', fetchRecommendations);
+
+        // --- INITIALIZATION ---
         setLanguage('kk');
+
     </script>
 
 </body>
 </html>
-
