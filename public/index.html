@@ -12,6 +12,9 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v9.1.0/ol.css">
     <script src="https://cdn.jsdelivr.net/npm/ol@v9.1.0/dist/ol.js"></script>
 
+    <!-- Marked.js for Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
     <style>
         #map { height: 100vh; width: 100%; cursor: crosshair; background: #1a202c; }
         body { font-family: 'Inter', sans-serif; overflow: hidden; }
@@ -24,21 +27,57 @@
         .toggle-checkbox:checked { right: 0; border-color: #38b2ac; }
         .toggle-checkbox:checked + .toggle-label { background-color: #38b2ac; }
         
-        /* Styles for the new recommendation drawer */
+        /* Styles for the recommendation drawer */
         #recommendation-drawer {
             transform: translateY(110%);
             transition: transform 0.4s ease-in-out;
-            max-height: 50vh; /* Limit height to 50% of the viewport height */
+            max-height: 60vh; /* Increased max-height */
             overflow-y: auto;
         }
         #recommendation-drawer.visible {
             transform: translateY(0);
         }
+        
+        /* Styles for Markdown content */
         #recommendation-container { 
             white-space: pre-wrap; 
             line-height: 1.6; 
             word-wrap: break-word;
+            text-align: left; /* Align text to the left for better readability */
         }
+        #recommendation-container h1,
+        #recommendation-container h2,
+        #recommendation-container h3 {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #90cdf4; /* Lighter blue */
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid #4a5568;
+            padding-bottom: 0.25rem;
+        }
+        #recommendation-container p {
+            margin-bottom: 0.75rem;
+        }
+        #recommendation-container ul {
+            list-style-type: disc;
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        #recommendation-container li {
+            margin-bottom: 0.25rem;
+        }
+        #recommendation-container strong {
+            color: #e2e8f0; /* Lighter gray for emphasis */
+            font-weight: 600;
+        }
+        #recommendation-container code {
+            background-color: #2d3748;
+            padding: 0.1rem 0.3rem;
+            border-radius: 0.25rem;
+            font-family: monospace;
+        }
+
     </style>
 </head>
 <body class="bg-gray-900 text-white">
@@ -182,7 +221,7 @@
                 const response = await fetch('/api/get-recommendations', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ lat: lastClickedLatLng.lat, lon: lastClickedLatLng.lng, ndvi: lastNdviValue, weatherData: lastWeatherData, lang: currentLang }), });
                 if (!response.ok) { const errorData = await response.json(); throw new Error(errorData.details || 'Server error'); }
                 const data = await response.json();
-                ui.recsContainer.innerHTML = `<p>${data.recommendation}</p>`;
+                ui.recsContainer.innerHTML = marked.parse(data.recommendation);
             } catch (error) {
                 console.error("Recommendation Fetch Error:", error);
                 ui.recsContainer.innerHTML = `<p class="text-center text-red-400">${translations[currentLang].error_recs}</p>`;
