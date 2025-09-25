@@ -64,32 +64,32 @@
 
     </style>
 </head>
-<body class="bg-green-900 text-white">
+<body class="bg-gray-900 text-white" style="background-color: #587969;">
     
     <div id="map" class="relative">
         <!-- Main Information Panel (Left Side) -->
-        <div id="info-panel" class="absolute top-4 left-4 z-[1000] w-full max-w-sm p-4 bg-green-900 bg-opacity-80 backdrop-blur-sm rounded-lg shadow-2xl transition-all duration-300 max-h-[calc(100vh-2rem)] overflow-y-auto">
+        <div id="info-panel" class="absolute top-4 left-4 z-[1000] w-full max-w-sm p-4 bg-opacity-80 backdrop-blur-sm rounded-lg shadow-2xl transition-all duration-300 max-h-[calc(100vh-2rem)] overflow-y-auto" style="background-color: rgba(0, 104, 55, 0.8);">
             
             <div class="flex justify-center mb-4">
                 <img src="logo-main.png" alt="KazNARU Logo" class="h-16"/>
             </div>
             
-            <div class="absolute top-3 right-3 flex space-x-1 bg-green-800 rounded-lg p-1">
+            <div class="absolute top-3 right-3 flex space-x-1 rounded-lg p-1" style="background-color: #587969;">
                 <button id="lang-kk" class="lang-btn px-2 py-1 text-xs font-semibold rounded-md transition-colors">ҚАЗ</button>
                 <button id="lang-ru" class="lang-btn px-2 py-1 text-xs font-semibold rounded-md transition-colors">РУС</button>
             </div>
 
-            <h1 data-translate-key="title" class="text-xl font-bold text-green-300 mb-2 text-center"></h1>
+            <h1 data-translate-key="title" class="text-xl font-bold text-green-200 mb-2 text-center"></h1>
             <p data-translate-key="subtitle" class="text-green-100 text-sm mb-3 text-center"></p>
             
-            <div class="bg-green-800 rounded-md p-3 text-lg font-mono tracking-wider text-green-300 text-center mb-3">
+            <div class="rounded-md p-3 text-lg font-mono tracking-wider text-center mb-3" style="background-color: #006837; color: #a7f3d0;">
                 <span id="coords"></span>
             </div>
             
             <!-- NDVI Section -->
             <div class="mb-4">
-                <h2 data-translate-key="ndvi_title" class="text-lg font-semibold text-green-300 mb-2"></h2>
-                <div class="bg-green-800 rounded-md p-3 space-y-3">
+                <h2 data-translate-key="ndvi_title" class="text-lg font-semibold text-green-200 mb-2"></h2>
+                <div class="rounded-md p-3 space-y-3" style="background-color: #006837;">
                     <div class="flex items-center justify-between">
                         <span data-translate-key="show_ndvi_layer" class="text-green-100"></span>
                         <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
@@ -97,9 +97,9 @@
                             <label for="ndvi-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer"></label>
                         </div>
                     </div>
-                    <div class="flex items-center justify-between pt-2 border-t border-green-700">
+                    <div class="flex items-center justify-between pt-2 border-t" style="border-color: #587969;">
                         <span data-translate-key="ndvi_value" class="text-green-100"></span>
-                        <span id="ndvi-value-display" class="font-mono text-lg text-green-300">-</span>
+                        <span id="ndvi-value-display" class="font-mono text-lg" style="color: #a7f3d0;">-</span>
                     </div>
                     <div id="ndvi-legend" class="hidden mt-3">
                         <div class="w-full h-4 rounded-md bg-gradient-to-r from-yellow-800 via-yellow-500 to-green-500"></div>
@@ -113,22 +113,22 @@
 
             <!-- Get Recommendations Button -->
             <div class="mb-4">
-                 <h2 data-translate-key="recommendation_title" class="text-lg font-semibold text-green-300 mb-2"></h2>
-                 <button id="get-recs-btn" data-translate-key="get_recs_btn" class="w-full bg-green-700 hover:bg-green-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded-md transition-colors"></button>
+                 <h2 data-translate-key="recommendation_title" class="text-lg font-semibold text-green-200 mb-2"></h2>
+                 <button id="get-recs-btn" data-translate-key="get_recs_btn" class="w-full disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded-md transition-colors" style="background-color: #587969;"></button>
             </div>
 
             <!-- Weather Section -->
             <div class="mb-4">
-                <h2 data-translate-key="current_weather_title" class="text-lg font-semibold text-green-300 mb-2"></h2>
-                <div id="weather-container" class="bg-green-800 rounded-md p-3 text-base text-green-100 min-h-[100px] flex items-center justify-center">
+                <h2 data-translate-key="current_weather_title" class="text-lg font-semibold text-green-200 mb-2"></h2>
+                <div id="weather-container" class="rounded-md p-3 text-base text-green-100 min-h-[100px] flex items-center justify-center" style="background-color: #006837;">
                     <p data-translate-key="weather_placeholder" class="text-center text-gray-400"></p>
                 </div>
             </div>
 
             <!-- Forecast Section -->
             <div class="mb-4">
-                <h2 data-translate-key="forecast_title" class="text-lg font-semibold text-green-300 mb-2"></h2>
-                <div id="forecast-container" class="bg-green-800 rounded-md p-3 min-h-[150px] flex flex-col justify-center">
+                <h2 data-translate-key="forecast_title" class="text-lg font-semibold text-green-200 mb-2"></h2>
+                <div id="forecast-container" class="rounded-md p-3 min-h-[150px] flex flex-col justify-center" style="background-color: #006837;">
                      <p data-translate-key="forecast_placeholder" class="text-center text-gray-400"></p>
                 </div>
             </div>
@@ -137,12 +137,12 @@
     </div>
     
     <!-- New Recommendation Drawer (Bottom of Screen) -->
-    <div id="recommendation-drawer" class="fixed bottom-0 left-0 right-0 z-[1050] bg-green-900 bg-opacity-95 backdrop-blur-sm shadow-2xl rounded-t-lg p-4 w-full md:w-3/4 lg:w-1/2 mx-auto">
+    <div id="recommendation-drawer" class="fixed bottom-0 left-0 right-0 z-[1050] bg-opacity-95 backdrop-blur-sm shadow-2xl rounded-t-lg p-4 w-full md:w-3/4 lg:w-1/2 mx-auto" style="background-color: rgba(0, 104, 55, 0.95);">
         <div class="flex justify-between items-center mb-3">
-            <h2 data-translate-key="recommendation_title" class="text-xl font-bold text-green-300"></h2>
+            <h2 data-translate-key="recommendation_title" class="text-xl font-bold text-green-200"></h2>
             <button id="close-recs-btn" class="text-gray-400 hover:text-white text-3xl font-bold leading-none">&times;</button>
         </div>
-        <div id="recommendation-container" class="p-3 bg-green-800 rounded-md min-h-[150px]">
+        <div id="recommendation-container" class="p-3 rounded-md min-h-[150px]" style="background-color: #587969;">
             <p data-translate-key="recs_placeholder" class="text-center text-gray-400"></p>
         </div>
     </div>
@@ -200,12 +200,22 @@
                 const { icon, description } = getWeatherInfo(daily.weather_code[i]); 
                 const maxTemp = Math.round(daily.temperature_2m_max[i]); 
                 const minTemp = Math.round(daily.temperature_2m_min[i]);
-                const precip = daily.precipitation_sum[i].toFixed(1);
-                const wind = Math.round(daily.wind_speed_10m_max[i]);
-                const humidity = Math.round(daily.relative_humidity_2m_mean[i]);
+                
+                const precipValue = daily.precipitation_sum?.[i];
+                const precip = (precipValue !== null && typeof precipValue !== 'undefined') ? precipValue.toFixed(1) : '0.0';
+
+                const windValue = daily.wind_speed_10m_max?.[i];
+                const wind = (windValue !== null && typeof windValue !== 'undefined') ? Math.round(windValue) : '-';
+                
+                let humidity = '-';
+                if (daily.relative_humidity_2m_max?.[i] !== null && typeof daily.relative_humidity_2m_max?.[i] !== 'undefined' &&
+                    daily.relative_humidity_2m_min?.[i] !== null && typeof daily.relative_humidity_2m_min?.[i] !== 'undefined') {
+                    humidity = Math.round((daily.relative_humidity_2m_max[i] + daily.relative_humidity_2m_min[i]) / 2);
+                }
 
                 const item = document.createElement('div'); 
-                item.className = 'bg-green-700 rounded-lg p-2 space-y-2 mb-2 transition-all hover:bg-green-600'; 
+                item.className = 'rounded-lg p-2 space-y-2 mb-2 transition-all hover:bg-green-600';
+                item.style.backgroundColor = '#587969';
                 item.innerHTML = `
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
@@ -220,7 +230,7 @@
                             <p class="text-gray-400">${minTemp}°</p>
                         </div>
                     </div>
-                    <div class="grid grid-cols-3 gap-2 text-center text-sm pt-2 border-t border-green-800">
+                    <div class="grid grid-cols-3 gap-2 text-center text-sm pt-2 border-t" style="border-color: #006837;">
                         <div>
                             <p class="text-xs text-gray-400" data-translate-key="precip">${translations[currentLang].precip}</p>
                             <p class="font-semibold">${precip} mm</p>
@@ -241,7 +251,7 @@
         
         // --- MAP LOGIC ---
         const markerSource = new ol.source.Vector();
-        const markerLayer = new ol.layer.Vector({ source: markerSource, style: new ol.style.Style({ image: new ol.style.Icon({ anchor: [0.5, 1], src: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32"><path fill="%236ECB63" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>` }) }), });
+        const markerLayer = new ol.layer.Vector({ source: markerSource, style: new ol.style.Style({ image: new ol.style.Icon({ anchor: [0.5, 1], src: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32"><path fill="%23a7f3d0" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>` }) }), });
         const ndviLayer = new ol.layer.Tile({ source: new ol.source.XYZ({ url: '/api/get-ndvi-tiles?z={z}&x={x}&y={y}', attributions: 'NDVI © Google Earth Engine' }), opacity: 0.7, visible: false });
         const map = new ol.Map({ target: 'map', layers: [ new ol.layer.Tile({ source: new ol.source.XYZ({ url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}' }) }), ndviLayer, markerLayer ], view: new ol.View({ center: ol.proj.fromLonLat([69.14, 54.87]), zoom: 7 }), controls: [], });
 
@@ -249,7 +259,7 @@
         async function fetchWeatherData(lat, lon) { 
             ui.weather.innerHTML = `<p class="text-center text-yellow-400">${translations[currentLang].fetching_current}</p>`; 
             ui.forecast.innerHTML = `<p class="text-center text-yellow-400">${translations[currentLang].fetching_forecast}</p>`; 
-            const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,relative_humidity_2m_mean&forecast_days=16`; 
+            const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,relative_humidity_2m_max,relative_humidity_2m_min&forecast_days=16`; 
             try { 
                 const response = await fetch(apiUrl); 
                 if (!response.ok) throw new Error('Network response failed'); 
@@ -264,7 +274,7 @@
         }
         async function fetchNdviData(lat, lon) { ui.ndviValue.textContent = translations[currentLang].fetching_ndvi; lastNdviValue = null; try { const response = await fetch(`/api/get-ndvi-value?lat=${lat}&lon=${lon}`); if (!response.ok) throw new Error('Failed to fetch NDVI value'); const data = await response.json(); if (data.ndvi !== null && typeof data.ndvi !== 'undefined') { const ndvi = data.ndvi.toFixed(3); ui.ndviValue.textContent = ndvi; lastNdviValue = ndvi; } else { ui.ndviValue.textContent = translations[currentLang].ndvi_no_data; } } catch (error) { console.error("NDVI Value Fetch Error:", error); ui.ndviValue.textContent = translations[currentLang].ndvi_no_data; } }
         async function fetchRecommendations() {
-            if (!lastClickedLatLng || !lastWeatherData || !lastNdviValue) {
+            if (!lastClickedLatLng || !lastWeatherData || lastNdviValue === null) {
                 alert(translations[currentLang].click_map_first);
                 return;
             }
