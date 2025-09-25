@@ -23,7 +23,7 @@ module.exports = async (req, res) => {
     try {
         const { lat, lon, ndvi, weatherData, lang } = req.body;
 
-        if (!lat || !lon || !ndvi || !weatherData) {
+        if (!lat || !lon || ndvi === null || !weatherData) {
             return res.status(400).json({ error: 'Missing required data: lat, lon, ndvi, and weatherData are required.' });
         }
 
@@ -33,7 +33,7 @@ module.exports = async (req, res) => {
             return res.status(500).json({ error: 'Server configuration error: Missing OpenAI API key.' });
         }
         
-        // Construct a detailed prompt for the GPT-4o model
+        // Construct a detailed prompt for the GPT-5 model
         const prompt = createPromptForAgronomist(lat, lon, ndvi, weatherData, lang);
 
         // Fetch the recommendation from OpenAI
@@ -51,12 +51,6 @@ module.exports = async (req, res) => {
 
 /**
  * Creates a detailed prompt for the AI model based on the provided data.
- * @param {number} lat - Latitude of the location.
- * @param {number} lon - Longitude of the location.
- * @param {string} ndvi - The NDVI value for the location.
- * @param {object} weather - The weather data object.
- * @param {string} lang - The desired language for the recommendation ('kk' or 'ru').
- * @returns {string} A formatted prompt string for the OpenAI API.
  */
 function createPromptForAgronomist(lat, lon, ndvi, weather, lang) {
     const language = lang === 'kk' ? 'Kazakh' : 'Russian';
@@ -66,7 +60,13 @@ function createPromptForAgronomist(lat, lon, ndvi, weather, lang) {
     // Create a detailed string from the daily forecast data
     let dailyForecastString = "16-Day Forecast Details:\n";
     weather.daily.time.forEach((date, i) => {
-        dailyForecastString += `- ${date}: Max Temp: ${weather.daily.temperature_2m_max[i]}°C, Min Temp: ${weather.daily.temperature_2m_min[i]}°C, Precipitation: ${weather.daily.precipitation_sum[i]}mm, Max Wind: ${weather.daily.wind_speed_10m_max[i]}km/h, Avg Humidity: ${weather.daily.relative_humidity_2m_mean[i]}%\n`;
+        let avgHumidity = 'N/A';
+        // Safely calculate average humidity if max and min are available
+        if (weather.daily.relative_humidity_2m_max?.[i] != null && weather.daily.relative_humidity_2m_min?.[i] != null) {
+            avgHumidity = `${Math.round((weather.daily.relative_humidity_2m_max[i] + weather.daily.relative_humidity_2m_min[i]) / 2)}%`;
+        }
+        
+        dailyForecastString += `- ${date}: Max Temp: ${weather.daily.temperature_2m_max[i]}°C, Min Temp: ${weather.daily.temperature_2m_min[i]}°C, Precipitation: ${weather.daily.precipitation_sum[i]}mm, Max Wind: ${weather.daily.wind_speed_10m_max[i]}km/h, Avg Humidity: ${avgHumidity}\n`;
     });
 
     const dataAnalysis = `
@@ -95,8 +95,6 @@ Format the response clearly with Markdown headings.`;
 
 /**
  * Provides a simple interpretation of an NDVI value.
- * @param {number} ndvi - The NDVI value.
- * @returns {string} A text interpretation.
  */
 function interpretNdvi(ndvi) {
     if (ndvi < 0.2) return "very low plant health or bare soil.";
@@ -108,17 +106,13 @@ function interpretNdvi(ndvi) {
 
 /**
  * Sends a request to the OpenAI API to get a recommendation.
- * @param {string} prompt - The prompt to send to the model.
- * @param {string} apiKey - Your OpenAI API key.
- * @returns {Promise<string>} A promise that resolves with the recommendation text.
  */
 async function getOpenAiRecommendation(prompt, apiKey) {
     return new Promise((resolve, reject) => {
         const payload = JSON.stringify({
-            model: "gpt-4.1",
+            model: "gpt-5",
             messages: [{ role: "user", content: prompt }],
-                        
-            
+            reasoning_effort: "minimal",
         });
 
         const options = {
@@ -138,7 +132,11 @@ async function getOpenAiRecommendation(prompt, apiKey) {
                 if (res.statusCode >= 200 && res.statusCode < 300) {
                     try {
                         const parsedData = JSON.parse(data);
-                        resolve(parsedData.choices[0].message.content.trim());
+                        if (parsedData.choices && parsedData.choices[0] && parsedData.choices[0].message) {
+                           resolve(parsedData.choices[0].message.content.trim());
+                        } else {
+                           reject(new Error('Invalid response structure from OpenAI.'));
+                        }
                     } catch (e) {
                         reject(new Error('Failed to parse OpenAI response.'));
                     }
